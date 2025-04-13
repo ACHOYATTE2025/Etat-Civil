@@ -50,35 +50,35 @@ public SignupResponse Register( SignupRequest request){
     //chercher la commune
     Commune commune =  communeRepository.findByNameCommune(request.getNamecommune());
     
-    if(commune==null){
-      Commune communeX = this.communeRepository.save(
-      Commune.builder().nameCommune(request.getNamecommune()).build());
-     
+        if(commune==null){
+          Commune communeX = this.communeRepository.save(
+          Commune.builder().nameCommune(request.getNamecommune()).build());
+        
+          
+        //implementer les données l'utilisateur
+        Utilisateur utilisateur  = Utilisateur.builder()
+                                  .email(request.getEmail())
+                                  .username(request.getUsername())
+                                  .password(passwordEncoder.encode(request.getPassword()))
+                                  .role(Role.ADMIN)
+                                  .commune(communeX)
+                                  .active(false)
+                                  .build();
+
+
+        System.out.println(utilisateur);                           
+        //sauvegarder les informations
+      this.communeRepository.save(utilisateur);
+        //envoyer le code pour activer le compte admin
+        this.validationService.createCode(utilisateur);
+
+        //creer le token après authentification
+        String token = jwtUtil.generateToken(utilisateur);
+
+        //renvoyer un Token null pour une commune déja inscrite
+        return new SignupResponse(token);
+        }else{   return new SignupResponse(" VOUS ÊTES DEJA INSCRIT");}
       
-    //implementer les données l'utilisateur
-     Utilisateur utilisateur  = Utilisateur.builder()
-                              .email(request.getEmail())
-                              .username(request.getUsername())
-                              .password(passwordEncoder.encode(request.getPassword()))
-                              .role(Role.ADMIN)
-                              .commune(communeX)
-                              .active(false)
-                              .build();
-
-
-    System.out.println(utilisateur);                           
-    //sauvegarder les informations
-   this.communeRepository.save(utilisateur);
-     //envoyer le code pour activer le compte admin
-     this.validationService.createCode(utilisateur);
-
-     //creer le token après authentification
-     String token = jwtUtil.generateToken(utilisateur);
-
-     //renvoyer un Token null pour une commune déja inscrite
-     return new SignupResponse(token);
-    }else{   return new SignupResponse(" VOUS ÊTES DEJA INSCRIT");}
-  
         
  
   }
@@ -98,7 +98,7 @@ public SignupResponse Register( SignupRequest request){
   
      this.reponses = ResponseEntity.ok().body("LE COMPTE DE L'ADMINISTRATEUR "+ subscriberActivatedorNot.getUsername()+
     " EST ACTIVEE");} 
-    catch(Exception e){this.reponses= ResponseEntity.badRequest().body("LE COMPTE DE L'ADMINISTRATEUR N'A PU ÊTRE ACTIVE");}
+    catch(Exception e){this.reponses= ResponseEntity.badRequest().body("LE COMPTE DE L'ADMINISTRATEUR N'A PU ÊTRE ACTIVE =>"+e.getLocalizedMessage());}
     
     return this.reponses;
    
