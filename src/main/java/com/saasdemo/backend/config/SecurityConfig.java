@@ -24,6 +24,7 @@ private final JwtAuthenticationFilter jwtFilter;
      .authorizeHttpRequests(authorize->
      authorize
                               .requestMatchers(HttpMethod.POST,"/signup").permitAll()
+                              .requestMatchers(HttpMethod.POST,"/adminCompteReactived").permitAll()
                               .anyRequest().authenticated())
                               .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                               

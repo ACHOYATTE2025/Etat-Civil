@@ -27,6 +27,8 @@ public JwtUtil(JwtRepository jwtRepository){
   @Value("${jwt.key}")
   private   String jwtSecret;
 
+
+  //20min
   @Value("${jwt.expiration}")
   private Long jwtexpiration;
 

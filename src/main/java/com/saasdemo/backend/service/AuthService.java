@@ -28,17 +28,19 @@ public class AuthService {
   private final JwtUtil jwtUtil;
   private final ValidationService validationService;
   private final  UtilisateurRepository utilisateurRepository;
+  private final UtilisateurService utilisateurService;
   private  ResponseEntity reponses;
 
 
   //Instancier 
   public AuthService(CommuneRepository communeRepository,PasswordEncoder passwordEncoder,JwtUtil jwtUtil,
-  ValidationService validationService,UtilisateurRepository utilisateurRepository){
+  ValidationService validationService,UtilisateurRepository utilisateurRepository,UtilisateurService utilisateurService){
     this.communeRepository=communeRepository;
     this.passwordEncoder =passwordEncoder;
     this.jwtUtil =jwtUtil;
     this.validationService=validationService;
     this.utilisateurRepository = utilisateurRepository;
+    this.utilisateurService = utilisateurService;
   }
     
   
@@ -104,7 +106,24 @@ public SignupResponse Register( SignupRequest request){
    
   }
 
-  }
+
+  // renvoi de code d'activation de compte admin de commune
+   public ResponseEntity<?> renvoiCode(Map<String,String> reactived) {
+    Utilisateur alpha=null;
+    RuntimeException repo = null;
+      try{
+          Utilisateur subscriber =   (Utilisateur) this.utilisateurService.loadUserByUsername(reactived.get("email"));
+        alpha=subscriber;
+        if(alpha.getActive()){repo = new RuntimeException("LE COMPTE DE L'ADMIN "+  alpha.getUsername()+" EST DEJA ACTIVEE");}
+        this.validationService.createCode(alpha);}
+      catch(Exception e){ repo = new RuntimeException("ERREUR ADMIN INCONNU");}
+    return ResponseEntity.ok().body(repo.getLocalizedMessage());
+     
+    }
+   
+   }
+
+  
 
 
 
