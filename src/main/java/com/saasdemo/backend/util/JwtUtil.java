@@ -12,7 +12,6 @@ import com.saasdemo.backend.repository.JwtRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.AllArgsConstructor;
 
 @Component
 public class JwtUtil {
@@ -26,7 +25,7 @@ public JwtUtil(JwtRepository jwtRepository){
 }
   
   @Value("${jwt.key}")
-  private  static String jwtSecret;
+  private   String jwtSecret;
 
   @Value("${jwt.expiration}")
   private Long jwtexpiration;
@@ -42,7 +41,7 @@ public JwtUtil(JwtRepository jwtRepository){
           .compact();
 
 
-       Jwt jwtbuild =
+      Jwt jwtbuild =
           Jwt.builder()
                   .valeur(jwtbearer.substring(0,jwtbearer.length()-1))
                   .desactive(false)
@@ -58,7 +57,7 @@ public JwtUtil(JwtRepository jwtRepository){
   //methods claims
   public Claims extractAllClaims(String token) {
     return Jwts.parser()
-    .setSigningKey(this.jwtSecret)
+    .setSigningKey(jwtSecret)
     .build()
     .parseClaimsJws(token)
     .getBody();

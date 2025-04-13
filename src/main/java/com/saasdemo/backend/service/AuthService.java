@@ -28,7 +28,7 @@ public class AuthService {
   private final JwtUtil jwtUtil;
   private final ValidationService validationService;
   private final  UtilisateurRepository utilisateurRepository;
-  private ResponseEntity reponses;
+  private  ResponseEntity reponses;
 
 
   //Instancier 
@@ -49,7 +49,7 @@ public SignupResponse Register( SignupRequest request){
       
     //chercher la commune
     Commune commune =  communeRepository.findByNameCommune(request.getNamecommune());
-    System.out.println("INFOS :"+commune);
+    
     if(commune==null){
       Commune communeX = this.communeRepository.save(
       Commune.builder().nameCommune(request.getNamecommune()).build());
@@ -65,6 +65,8 @@ public SignupResponse Register( SignupRequest request){
                               .active(false)
                               .build();
 
+
+    System.out.println(utilisateur);                           
     //sauvegarder les informations
    this.communeRepository.save(utilisateur);
      //envoyer le code pour activer le compte admin
@@ -75,7 +77,7 @@ public SignupResponse Register( SignupRequest request){
 
      //renvoyer un Token null pour une commune déja inscrite
      return new SignupResponse(token);
-    }else{   return new SignupResponse(null+" Vous êtes dejà Inscrit");}
+    }else{   return new SignupResponse(" VOUS ÊTES DEJA INSCRIT");}
   
         
  

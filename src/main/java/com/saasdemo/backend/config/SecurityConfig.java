@@ -7,13 +7,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-import lombok.RequiredArgsConstructor;
+import com.saasdemo.backend.security.JwtAuthenticationFilter;
+
+import lombok.AllArgsConstructor;
 
 @Configuration
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class SecurityConfig {
 
-
+private final JwtAuthenticationFilter jwtFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
@@ -23,7 +25,7 @@ public class SecurityConfig {
      authorize
                               .requestMatchers(HttpMethod.POST,"/signup").permitAll()
                               .anyRequest().authenticated())
-                              
+                              .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                               
                               .build();
   }
