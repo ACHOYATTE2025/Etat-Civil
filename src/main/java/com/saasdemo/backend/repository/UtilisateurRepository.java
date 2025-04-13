@@ -7,13 +7,15 @@ import org.springframework.stereotype.Repository;
 
 import com.saasdemo.backend.entity.Utilisateur;
 
+
 @Repository
 public interface UtilisateurRepository extends JpaRepository<Utilisateur,Long> {
 
   Optional<Utilisateur> findByEmail(String email);
 
-    // Trouver tous les utilisateurs  d'un tenant spécifique
+  Utilisateur findByPassword(String password);
   
+
 
 
 }

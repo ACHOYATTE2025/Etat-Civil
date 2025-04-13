@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saasdemo.backend.dto.CreateUserRequest;
+import com.saasdemo.backend.dto.LoginAdmin;
 import com.saasdemo.backend.dto.SignupRequest;
 import com.saasdemo.backend.dto.SignupResponse;
-import com.saasdemo.backend.dto.UserResponse;
-import com.saasdemo.backend.entity.Utilisateur;
 import com.saasdemo.backend.service.AuthService;
 import com.saasdemo.backend.service.UserService;
 
@@ -25,12 +24,9 @@ import jakarta.validation.Valid;
 public class AuthController {
   private final AuthService authService;
   private final UserService userService;
-  private final UserResponse userResponse;
-
-  public AuthController(AuthService authService,UserService userService, UserResponse userResponse) {
+  public AuthController(AuthService authService,UserService userService) {
     this.authService = authService;
     this.userService = userService;
-    this.userResponse = userResponse;
     
   }
 
@@ -49,6 +45,14 @@ public class AuthController {
       return this.authService.activationAdmin(activationCompteAdmin);
        }
 
+   
+//Login des Admins
+@PostMapping("/loginAdmin")
+public SignupResponse loginAdmin(@Valid @RequestBody LoginAdmin loginAdmin){
+   return this.authService.loginAdminService(loginAdmin);
+}
+
+
  //renvoi code d'activation
  //@PreAuthorize("hasAnyAuthority('ADMIN')" )
  @PostMapping(path = "/adminCompteReactived")
@@ -59,15 +63,11 @@ public class AuthController {
  // creation d'un user par un Admin
  @PostMapping("/createUser")
     @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse createUser(@Validated @RequestBody CreateUserRequest request) {
-       Utilisateur  user = userService.createUser(request);
-        return UserResponse.builder()
-                .id(user.getId())
-                .fullName(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .communeName(user.getCommune().getNameCommune())
-                .build();
+    public ResponseEntity<?> createUser(@Validated @RequestBody CreateUserRequest request) {
+       this.userService.createUser(request);
+        return ResponseEntity.ok().body("L'USER "+request.getFullName()+" EST CREE");
     }
+
+
     
-}
+} 

@@ -4,9 +4,12 @@ import java.time.Instant;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.saasdemo.backend.dto.LoginAdmin;
 import com.saasdemo.backend.dto.SignupRequest;
 import com.saasdemo.backend.dto.SignupResponse;
 import com.saasdemo.backend.entity.Commune;
@@ -15,6 +18,7 @@ import com.saasdemo.backend.entity.Validation;
 import com.saasdemo.backend.enums.Role;
 import com.saasdemo.backend.repository.CommuneRepository;
 import com.saasdemo.backend.repository.UtilisateurRepository;
+import com.saasdemo.backend.security.TenantContext;
 import com.saasdemo.backend.util.JwtUtil;
 
 import jakarta.transaction.Transactional;
@@ -30,22 +34,24 @@ public class AuthService {
   private final  UtilisateurRepository utilisateurRepository;
   private final UtilisateurService utilisateurService;
   private  ResponseEntity reponses;
-
+  private Utilisateur ux = null;
+   private final AuthenticationManager authenticationManager;
 
   //Instancier 
   public AuthService(CommuneRepository communeRepository,PasswordEncoder passwordEncoder,JwtUtil jwtUtil,
-  ValidationService validationService,UtilisateurRepository utilisateurRepository,UtilisateurService utilisateurService){
+  ValidationService validationService,UtilisateurRepository utilisateurRepository,UtilisateurService utilisateurService, AuthenticationManager authenticationManager){
     this.communeRepository=communeRepository;
     this.passwordEncoder =passwordEncoder;
     this.jwtUtil =jwtUtil;
     this.validationService=validationService;
     this.utilisateurRepository = utilisateurRepository;
     this.utilisateurService = utilisateurService;
+    this.authenticationManager = authenticationManager;
   }
     
   
 
-//authentifier un utilisateur
+//Enregistrer une Commune + son Admin
 @Transactional
 public SignupResponse Register( SignupRequest request){
       
@@ -85,7 +91,7 @@ public SignupResponse Register( SignupRequest request){
  
   }
 
-   //Activation de compte enregistré
+   //Activation de compte Admin + Commune enregistré
 
    public ResponseEntity<?> activationAdmin(Map<String, String> activation) {
     try{Validation codex = this.validationService.getValidation(activation.get("code"));
@@ -98,13 +104,33 @@ public SignupResponse Register( SignupRequest request){
     subscriberActivatedorNot.setActive(true);
     this.utilisateurRepository.save(subscriberActivatedorNot);
   
-     this.reponses = ResponseEntity.ok().body("LE COMPTE DE L'ADMINISTRATEUR "+ subscriberActivatedorNot.getUsername()+
+     this.reponses = ResponseEntity.ok().body("LE COMPTE DE "+subscriberActivatedorNot.getRole()+" "+ subscriberActivatedorNot.getUsername()+
     " EST ACTIVEE");} 
-    catch(Exception e){this.reponses= ResponseEntity.badRequest().body("LE COMPTE DE L'ADMINISTRATEUR N'A PU ÊTRE ACTIVE =>"+e.getLocalizedMessage());}
+    catch(Exception e){this.reponses= ResponseEntity.badRequest().body("LE COMPTE N'A PU ÊTRE ACTIVE =>"+e.getLocalizedMessage());}
     
     return this.reponses;
    
   }
+
+
+  // login Admin + Commune
+  public SignupResponse loginAdminService(LoginAdmin loginAdmin) {
+    String tokenX=null;
+    try{
+      this.ux =  (Utilisateur) this.utilisateurService.loadUserByUsername(loginAdmin.getEmail());
+      authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                       loginAdmin.getEmail(), loginAdmin.getPassword()));
+                       System.out.println("Nom Admin :"+this.ux.getUsername());
+                       TenantContext.setCurrentTenant(this.ux.getId());
+                       String token = this.jwtUtil.generateToken(ux);
+                       tokenX = token;}
+    catch(Exception e){tokenX="ADMIN NON AUTHENTIFIE=>"+e.getLocalizedMessage();}
+          
+    return new SignupResponse(tokenX);    
+    }
+             
+ 
+  
 
 
   // renvoi de code d'activation de compte admin de commune
@@ -120,6 +146,10 @@ public SignupResponse Register( SignupRequest request){
     return ResponseEntity.ok().body(repo.getLocalizedMessage());
      
     }
+
+
+
+   
    
    }
 

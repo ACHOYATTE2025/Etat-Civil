@@ -16,11 +16,14 @@ public class UserService {
   private final UtilisateurRepository utilisateurRepository ;
     private final CommuneRepository communeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ValidationService validationService;
 
-    public UserService(UtilisateurRepository utilisateurRepository, CommuneRepository communeRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UtilisateurRepository utilisateurRepository, CommuneRepository communeRepository, PasswordEncoder passwordEncoder, NotificationService notificationService, ValidationService validationService) {
         this.utilisateurRepository = utilisateurRepository;
         this.communeRepository = communeRepository;
         this.passwordEncoder = passwordEncoder;
+        this.validationService = validationService;
+       
     }
 
 
@@ -31,6 +34,8 @@ public class UserService {
         Utilisateur admin = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Commune commune = admin.getCommune();
 
+        this.utilisateurRepository.findByEmail(request.getEmail()); 
+
         // Créer un nouvel utilisateur dans la même organisation
         Utilisateur newUser = Utilisateur.builder()
                 .username(request.getFullName())
@@ -39,7 +44,8 @@ public class UserService {
                 .role(Role.USER) // Par défaut, l'utilisateur créé a le rôle USER
                 .commune(commune)
                 .build();
-
+       
+        this.validationService.createCode(newUser);
         return this.utilisateurRepository.save(newUser);
     }
     

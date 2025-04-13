@@ -63,7 +63,7 @@ public class Utilisateur  implements UserDetails {
     private String photoName;// noms du fichier*/
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "commune_id")
     private Commune commune;// Référence à la commune
 
