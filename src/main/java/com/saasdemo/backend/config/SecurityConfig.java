@@ -31,6 +31,7 @@ private final JwtAuthenticationFilter jwtFilter;
      .authorizeHttpRequests(authorize->
      authorize
                               .requestMatchers(HttpMethod.POST,"/signup").permitAll()
+                              .requestMatchers("/v3/**", "/swagger-ui/**").permitAll()//permettre l'affichage de swagger
                               .requestMatchers(HttpMethod.POST,"/adminCompteReactived").permitAll()
                               .requestMatchers(HttpMethod.POST,"/loginAdmin").permitAll()
                               .anyRequest().authenticated())

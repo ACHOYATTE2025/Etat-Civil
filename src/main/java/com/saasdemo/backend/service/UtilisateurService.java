@@ -4,6 +4,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import com.saasdemo.backend.repository.UtilisateurRepository;
 
@@ -28,7 +29,8 @@ public class UtilisateurService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return this.accountRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+        return this.accountRepository.findByEmail(email).orElseThrow(() 
+        -> new ResourceAccessException("UTILISATEUR NON TROUVE"));
     }
 
 }

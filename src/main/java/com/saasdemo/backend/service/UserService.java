@@ -14,13 +14,11 @@ import com.saasdemo.backend.repository.UtilisateurRepository;
 @Service
 public class UserService {
   private final UtilisateurRepository utilisateurRepository ;
-    private final CommuneRepository communeRepository;
     private final PasswordEncoder passwordEncoder;
     private final ValidationService validationService;
 
     public UserService(UtilisateurRepository utilisateurRepository, CommuneRepository communeRepository, PasswordEncoder passwordEncoder, NotificationService notificationService, ValidationService validationService) {
         this.utilisateurRepository = utilisateurRepository;
-        this.communeRepository = communeRepository;
         this.passwordEncoder = passwordEncoder;
         this.validationService = validationService;
        
