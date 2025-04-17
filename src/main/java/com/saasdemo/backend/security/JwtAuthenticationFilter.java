@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter implements Filter {
                             new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
                     SecurityContextHolder.getContext().setAuthentication(auth);
 
-                    TenantContext.setCurrentTenant(organizationId); // multi-tenant context
+                    TenantContext.setCurrentTenantId(organizationId); // multi-tenant context
                 });
             } catch (Exception ex) {
                 ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");

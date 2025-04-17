@@ -11,6 +11,8 @@ public interface CommuneRepository extends CrudRepository<Commune, Long> {
 
   Commune findByNameCommune(String nameCommune);
 
-    void save(Utilisateur utilisateur);
+  void save(Utilisateur utilisateur);
+
+ 
     
 }

@@ -14,6 +14,8 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur,Long> {
   Optional<Utilisateur> findByEmail(String email);
 
   Utilisateur findByPassword(String password);
+  Long countByCommuneId(Long orgId);
+  Long countByCommuneIdAndRole(Long orgId, String role);
   
 
 

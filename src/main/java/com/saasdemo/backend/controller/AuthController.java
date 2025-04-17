@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,10 +14,12 @@ import com.saasdemo.backend.dto.CreateUserRequest;
 import com.saasdemo.backend.dto.LoginAdmin;
 import com.saasdemo.backend.dto.SignupRequest;
 import com.saasdemo.backend.dto.SignupResponse;
+import com.saasdemo.backend.dto.UserResponse;
 import com.saasdemo.backend.service.AuthService;
 import com.saasdemo.backend.service.UserService;
 
 import jakarta.validation.Valid;
+
 
 
 
@@ -39,14 +42,15 @@ public class AuthController {
   
   //activer le compte de l'Admin
  
-  @PreAuthorize("hasAnyAuthority('ADMIN')" )
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/activationAdminCommune")
   public ResponseEntity<?> postMethodName(@RequestBody Map<String,String> activationCompteAdmin) {
       return this.authService.activationAdmin(activationCompteAdmin);
        }
 
-   
+  
 //Login des Admins
+@PreAuthorize("hasRole('ADMIN')")
 @PostMapping("/loginAdmin")
 public SignupResponse loginAdmin(@Valid @RequestBody LoginAdmin loginAdmin){
    return this.authService.loginAdminService(loginAdmin);
@@ -55,7 +59,7 @@ public SignupResponse loginAdmin(@Valid @RequestBody LoginAdmin loginAdmin){
 
  //renvoi code d'activation
  //@PreAuthorize("hasAnyAuthority('ADMIN')" )
- @PostMapping(path = "/adminCompteReactived")
+ @PostMapping(path = "/reactiveCompteAdmin")
  public ResponseEntity<?> reactivationCompte(@RequestBody Map<String,String> reactived) throws Exception {
     return this.authService.renvoiCode(reactived);
  }
@@ -67,6 +71,14 @@ public SignupResponse loginAdmin(@Valid @RequestBody LoginAdmin loginAdmin){
        this.userService.createUser(request);
         return ResponseEntity.ok().body("L'USER "+request.getFullName()+" EST CREE");
     }
+
+
+// obtenir l'utilisateur connceté
+@PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN','USER')")
+ @GetMapping("/currentUser")
+public UserResponse getMethodName() {
+   return this.userService.getCurrentUser();
+}
 
 
     

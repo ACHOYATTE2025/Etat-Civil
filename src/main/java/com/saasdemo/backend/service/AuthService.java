@@ -121,7 +121,7 @@ public SignupResponse Register( SignupRequest request){
       authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                        loginAdmin.getEmail(), loginAdmin.getPassword()));
                        System.out.println("Nom Admin :"+this.ux.getUsername());
-                       TenantContext.setCurrentTenant(this.ux.getId());
+                       TenantContext.setCurrentTenantId(this.ux.getId());
                        String token = this.jwtUtil.generateToken(ux);
                        tokenX = token;}
     catch(Exception e){tokenX="ADMIN NON AUTHENTIFIE=>"+e.getLocalizedMessage();}

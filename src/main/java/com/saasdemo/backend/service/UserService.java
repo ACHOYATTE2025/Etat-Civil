@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.saasdemo.backend.dto.CreateUserRequest;
+import com.saasdemo.backend.dto.UserResponse;
 import com.saasdemo.backend.entity.Commune;
 import com.saasdemo.backend.entity.Utilisateur;
 import com.saasdemo.backend.enums.Role;
@@ -40,11 +41,31 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER) // Par défaut, l'utilisateur créé a le rôle USER
+                .active(false)
                 .commune(commune)
                 .build();
        
         this.validationService.createCode(newUser);
         return this.utilisateurRepository.save(newUser);
     }
+
+
+// connaitre l'utilisateur connecté
+    public UserResponse getCurrentUser() {
+      Utilisateur user = (Utilisateur) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+      return UserResponse.builder()
+            .id(user.getId())
+            .fullName(user.getUsername())
+            .email(user.getEmail())
+            .role(user.getRole().name())
+            .communeName(user.getCommune().getNameCommune())
+            .build();
+    }
+
+
+
+    
+
+    
     
 }

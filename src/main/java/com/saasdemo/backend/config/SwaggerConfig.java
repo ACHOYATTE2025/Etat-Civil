@@ -26,7 +26,7 @@ import io.swagger.v3.oas.models.info.Info;
 public class SwaggerConfig {
 
   @Bean
-  public OpenAPI CustomOpenAi(){
+  public OpenAPI CustomOpenApi(){
     return new OpenAPI()
         .info(new Info()
         .title("API Gestion des États Civils")
