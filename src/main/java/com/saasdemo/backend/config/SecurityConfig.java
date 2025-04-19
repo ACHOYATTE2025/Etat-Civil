@@ -8,11 +8,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.saasdemo.backend.security.JwtAuthenticationFilter;
 import com.saasdemo.backend.security.SubscriptionGuardFilter;
@@ -21,6 +23,7 @@ import lombok.AllArgsConstructor;
 
 @Configuration
 @AllArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
 private PasswordEncoder passwordEncoder;
 private final JwtAuthenticationFilter jwtFilter;
@@ -34,14 +37,21 @@ private final SubscriptionGuardFilter subscriptionGuardFilter;
      authorize
                               .requestMatchers(HttpMethod.POST,"/signup").permitAll()
                               .requestMatchers("/v3/**", "/swagger-ui/**").permitAll()//permettre l'affichage de swagger
-                              .requestMatchers(HttpMethod.POST,"/reactiveCompteAdmin").permitAll()
-                              .requestMatchers(HttpMethod.POST,"/loginAdmin").permitAll()
+                              .requestMatchers(HttpMethod.POST,"/reactiveCompte").permitAll()
+                              .requestMatchers(HttpMethod.POST,"/activationCompte").permitAll()
+                              .requestMatchers(HttpMethod.POST,"/login").permitAll()
+                              .requestMatchers(HttpMethod.POST,"/resetPassword").permitAll()
+                              .requestMatchers(HttpMethod.POST,"/newPassword").permitAll()
+                              .requestMatchers(HttpMethod.GET,"/actuator/**").permitAll()
                               .anyRequest().authenticated())
                               .sessionManagement(httpSecuritySessionManagementConfigurer ->
                                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                              .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                              .addFilterAfter(subscriptionGuardFilter, JwtAuthenticationFilter.class)
+                              .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
+                             .addFilterAfter(subscriptionGuardFilter, JwtAuthenticationFilter.class)
                               .build(); }
+
+
+
    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

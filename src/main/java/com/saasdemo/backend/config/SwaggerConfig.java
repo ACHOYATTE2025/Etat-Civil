@@ -2,8 +2,6 @@ package com.saasdemo.backend.config;
 
 import org.springframework.context.annotation.Configuration;
 
-import com.saasdemo.backend.dto.Bean;
-
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,7 +23,7 @@ import io.swagger.v3.oas.models.info.Info;
 )
 public class SwaggerConfig {
 
-  @Bean
+  @org.springframework.context.annotation.Bean
   public OpenAPI CustomOpenApi(){
     return new OpenAPI()
         .info(new Info()

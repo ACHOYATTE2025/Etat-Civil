@@ -1,7 +1,7 @@
 package com.saasdemo.backend.service;
 
 import java.time.Instant;
-import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,7 +9,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.saasdemo.backend.dto.ActiveAdmin;
 import com.saasdemo.backend.dto.LoginAdmin;
+import com.saasdemo.backend.dto.NewPassword;
+import com.saasdemo.backend.dto.ReactivedCompte;
 import com.saasdemo.backend.dto.SignupRequest;
 import com.saasdemo.backend.dto.SignupResponse;
 import com.saasdemo.backend.entity.Commune;
@@ -22,9 +25,11 @@ import com.saasdemo.backend.security.TenantContext;
 import com.saasdemo.backend.util.JwtUtil;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Service
+@Slf4j
 public class AuthService {
   
   private final CommuneRepository communeRepository;
@@ -93,8 +98,8 @@ public SignupResponse Register( SignupRequest request){
 
    //Activation de compte Admin + Commune enregistré
 
-   public ResponseEntity<?> activationAdmin(Map<String, String> activation) {
-    try{Validation codex = this.validationService.getValidation(activation.get("code"));
+   public ResponseEntity<?> activationAdmin(ActiveAdmin activationCompteAdmin) {
+    try{Validation codex = this.validationService.getValidation(activationCompteAdmin.getCode());
 
     if (Instant.now().isAfter(codex.getExpirationCode())) {
       throw new RuntimeException("Le Code d'Activation a expirée");}
@@ -134,11 +139,11 @@ public SignupResponse Register( SignupRequest request){
 
 
   // renvoi de code d'activation de compte admin de commune
-   public ResponseEntity<?> renvoiCode(Map<String,String> reactived) {
+   public ResponseEntity<?> renvoiCode(ReactivedCompte reactived) {
     Utilisateur alpha=null;
     RuntimeException repo = null;
       try{
-          Utilisateur subscriber =   (Utilisateur) this.utilisateurService.loadUserByUsername(reactived.get("email"));
+          Utilisateur subscriber =   (Utilisateur) this.utilisateurService.loadUserByUsername(reactived.getEmail());
         alpha=subscriber;
         if(alpha.getActive()){repo = new RuntimeException("LE COMPTE DE L'ADMIN "+  alpha.getUsername()+" EST DEJA ACTIVEE");}
         this.validationService.createCode(alpha);}
@@ -148,10 +153,56 @@ public SignupResponse Register( SignupRequest request){
     }
 
 
+/***************************************************************************************************/
 
+//modifier mot de passe
+public void resetpassword(ReactivedCompte UpdateMotDePasse) {
+  Utilisateur subscriber = (Utilisateur) this.utilisateurService.loadUserByUsername(UpdateMotDePasse.getEmail());
+  log.info(subscriber.getUsername());
+  this.validationService.createCode(subscriber);
+}
+
+/**************************************************************************************************/
+//nouveau mot de passe
+public void newpassword(NewPassword nouveauMotDePasse)  {
+  Utilisateur subscriber = (Utilisateur) this.utilisateurService.loadUserByUsername(nouveauMotDePasse.getEmail());
+  final Optional<Validation> code = Optional.ofNullable(validationService.getValidation(nouveauMotDePasse.getCode()));
+  if (code.isPresent()) {
+      String mdp = passwordEncoder.encode(nouveauMotDePasse.getPassword());
+      subscriber.setPassword(mdp);
+
+      this.utilisateurRepository.save(subscriber);
+        }
+
+  }
+
+
+  //desactiver souscripteur USER
+  public ResponseEntity<?> deletesouscripteur(ReactivedCompte emailSouscripteur) throws Exception {
+    String email = emailSouscripteur.getEmail();
+    Utilisateur souscris = this.utilisateurRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Subscriber not found"));
+
+    log.info("USER A DESACTIVER :"+souscris.getEmail() + " ROLE :" +souscris.getRole()+ " ACTIF :"+souscris.getActive());
+    
+        if(souscris.getActive() && souscris.getRole().name().equals("USER" ))
+        {
+          souscris.setActive(false);
+          Utilisateur accord = this.utilisateurRepository.save(souscris);
+          this.reponses = ResponseEntity.ok().body(accord.getRole()+" " + accord.getUsername() +" A ETE DESACTIVE");
+        }
+        else if(!souscris.getActive() && souscris.getRole().name().equals("USER" )){
+          this.reponses =ResponseEntity.badRequest().body(souscris.getRole().name()+ " "+souscris.getUsername()+" EST DEJA DESACTIVE");
+        }
+        else{this.reponses =  ResponseEntity.badRequest().body(" IMPOSSIBLE DE DESACTIVER" );} 
+      
+     
+      
+      return this.reponses;
+
+}
    
    
-   }
+}
 
   
 

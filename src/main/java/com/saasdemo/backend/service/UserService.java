@@ -41,7 +41,7 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER) // Par défaut, l'utilisateur créé a le rôle USER
-                .active(false)
+                .active(true)
                 .commune(commune)
                 .build();
        

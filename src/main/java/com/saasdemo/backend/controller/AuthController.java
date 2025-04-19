@@ -1,22 +1,26 @@
 package com.saasdemo.backend.controller;
 
-import java.util.Map;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.saasdemo.backend.dto.ActiveAdmin;
 import com.saasdemo.backend.dto.CreateUserRequest;
 import com.saasdemo.backend.dto.LoginAdmin;
+import com.saasdemo.backend.dto.NewPassword;
+import com.saasdemo.backend.dto.ReactivedCompte;
 import com.saasdemo.backend.dto.SignupRequest;
 import com.saasdemo.backend.dto.SignupResponse;
 import com.saasdemo.backend.dto.UserResponse;
 import com.saasdemo.backend.service.AuthService;
 import com.saasdemo.backend.service.UserService;
+import com.saasdemo.backend.util.JwtUtil;
 
 import jakarta.validation.Valid;
 
@@ -27,9 +31,12 @@ import jakarta.validation.Valid;
 public class AuthController {
   private final AuthService authService;
   private final UserService userService;
-  public AuthController(AuthService authService,UserService userService) {
+  private final JwtUtil jwtUtil;
+
+  public AuthController(AuthService authService,UserService userService, JwtUtil jwtUtil) {
     this.authService = authService;
     this.userService = userService;
+    this.jwtUtil = jwtUtil;
     
   }
 
@@ -43,15 +50,15 @@ public class AuthController {
   //activer le compte de l'Admin
  
   @PreAuthorize("hasRole('ADMIN')")
-  @PostMapping("/activationAdminCommune")
-  public ResponseEntity<?> postMethodName(@RequestBody Map<String,String> activationCompteAdmin) {
+  @PostMapping("/activationCompte")
+  public ResponseEntity<?> postMethodName(@RequestBody ActiveAdmin activationCompteAdmin) {
       return this.authService.activationAdmin(activationCompteAdmin);
        }
 
   
 //Login des Admins
 @PreAuthorize("hasRole('ADMIN')")
-@PostMapping("/loginAdmin")
+@PostMapping("/login")
 public SignupResponse loginAdmin(@Valid @RequestBody LoginAdmin loginAdmin){
    return this.authService.loginAdminService(loginAdmin);
 }
@@ -59,8 +66,8 @@ public SignupResponse loginAdmin(@Valid @RequestBody LoginAdmin loginAdmin){
 
  //renvoi code d'activation
  //@PreAuthorize("hasAnyAuthority('ADMIN')" )
- @PostMapping(path = "/reactiveCompteAdmin")
- public ResponseEntity<?> reactivationCompte(@RequestBody Map<String,String> reactived) throws Exception {
+ @PostMapping(path = "/reactiveCompte")
+ public ResponseEntity<?> reactivationCompte(@RequestBody ReactivedCompte reactived) throws Exception {
     return this.authService.renvoiCode(reactived);
  }
   
@@ -80,6 +87,34 @@ public UserResponse getMethodName() {
    return this.userService.getCurrentUser();
 }
 
+//modifier mot de passe
+    @ResponseStatus(value = HttpStatus.FOUND)
+    @PostMapping(path = "resetPassword")
+    public void ModifierMotDePasse(@RequestBody ReactivedCompte UpdateMotDePasse) throws Throwable {
+        this.authService.resetpassword(UpdateMotDePasse);
+    }
+
+ //nouveau mot de passe
+    @ResponseStatus(value = HttpStatus.CREATED)
+    @PostMapping(path = "newPassword")
+    public void newpassword(@RequestBody NewPassword NouveauMotDePasse) throws Throwable {
+        this.authService.newpassword(NouveauMotDePasse);
+    }
+
+
+
+//deconnexion
+@PostMapping(path = "deconnexion")
+public ResponseEntity<?> deconex()  {
+   return this.jwtUtil.deconex();
+}
+
+
+//desactiver un souscripteur
+@PostMapping("desactiverUSER")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?>   deletesouscripteur(@RequestBody ReactivedCompte emailSouscripteur) throws Exception {
+           return this.authService.deletesouscripteur( emailSouscripteur);}
 
     
 } 
